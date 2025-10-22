@@ -1,0 +1,1 @@
+# Handwriting-Text-Recognizer---Pytesseract-TROCR
