@@ -1,0 +1,71 @@
+#WEB CANVAS
+
+!pip install gradio pytesseract pillow
+
+import gradio as gr
+from PIL import Image
+import pytesseract
+
+def recognize_text(image):
+    text = pytesseract.image_to_string(image)
+    return text.strip()
+
+gr.Interface(
+    fn=recognize_text,
+    inputs=gr.Image(type="pil", label="Write here"),
+    outputs="text",
+    title="🖊️ Handwriting Text Recognizer",
+    description="Write with your mouse or S-Pen below. The model will extract text from your handwriting."
+).launch()
+
+
+============================================================================================================
+============================================================================================================
+
+
+#TRANSFORMERS-TROCR
+
+
+!pip install transformers pillow gradio
+
+from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+from PIL import Image
+import gradio as gr
+
+# Load model
+processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
+model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-handwritten")
+
+def recognize(image):
+    pixel_values = processor(images=image, return_tensors="pt").pixel_values
+    generated_ids = model.generate(pixel_values)
+    text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    return text
+
+gr.Interface(
+    fn=recognize,
+    inputs=gr.Image(type="pil", label="Draw or Upload Handwriting"),
+    outputs="text",
+    title="🖋️ Handwriting Recognition (TrOCR)"
+).launch()
+
+
+
+
+============================================================================================================
+============================================================================================================
+
+
+
+# File upload + Tesseract
+
+
+from google.colab import files
+uploaded = files.upload()
+
+from PIL import Image
+import pytesseract
+
+for fname in uploaded.keys():
+    text = pytesseract.image_to_string(Image.open(fname))
+    print(f"\n---- Text from {fname} ----\n{text}")
